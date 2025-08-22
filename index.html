@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yadlapalli Yajna Kedara Srujan Resume</title>
+  <meta name="description" content="An interactive resume with a sports-broadcast style intro, clean academics timeline, and hover-expanding cards for skills, achievements, and hobbies." />
+  <style>
+    :root {
+      --bg: #0a0b0f;
+      --card: #12131a;
+      --text: #e6e8ee;
+      --muted: #a8b0c0;
+      --accent: #e10600; /* F1 red */
+      --accent-2: #15b8ff; /* cool cyan for football lights */
+      --ring: rgba(21, 184, 255, 0.35);
+      --radius: 20px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, "Noto Sans", "Helvetica Neue", sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== HERO INTRO (Football / F1 style) ===== */
+    
+    .hero {
+      position: relative; height: 100vh; overflow: hidden; display: grid; place-items: center; isolation: isolate;
+      background: radial-gradient(1200px 600px at 50% 20%, rgba(21, 184, 255, .15), transparent 60%),
+                  radial-gradient(800px 400px at 20% 0%, rgba(225,6,0,.15), transparent 60%),
+                  linear-gradient(180deg, #0a0b0f 0%, #090a0e 100%);
+    }
+    /* moving stadium lights */
+    .lights::before, .lights::after {
+      content: ""; position: absolute; inset: -20% -10% auto -10%; height: 60%;
+      background: radial-gradient(500px 100px at 50% 0%, rgba(255,255,255,.14), transparent 60%);
+      filter: blur(6px); transform: rotate(-8deg) translateY(-30%);
+      animation: sweep 6s infinite linear;
+    }
+    .lights::after { inset: -20% -10% auto -10%; transform: rotate(8deg) translateY(-20%); animation-delay: 1.2s; }
+    @keyframes sweep { to { transform: translateY(110%) rotate(var(--r, -8deg)); } }
+
+    .countdown { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: clamp(48px, 12vw, 220px); font-weight: 800; letter-spacing: -0.03em; opacity: 0; filter: drop-shadow(0 8px 24px rgba(0,0,0,.6)); }
+    .countdown span { display: inline-block; }
+
+    .driver-card {
+      position: relative; padding: 28px 36px; border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(8px); box-shadow: var(--shadow);
+      transform: translateY(30px) scale(.96); opacity: 0; text-align: center; max-width: min(92vw, 900px);
+    }
+    .driver-name { font-size: clamp(28px, 5vw, 64px); font-weight: 900; letter-spacing: .02em; text-transform: uppercase; }
+    .driver-title { color: var(--muted); font-weight: 600; margin-top: 6px; }
+    .driver-chip { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px; background: rgba(21,184,255,.08); border: 1px solid var(--ring); margin-top: 14px; font-size: 14px; }
+    .chip-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+    .scroll-hint { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 10px; opacity: 0; }
+    .scroll-hint svg { width: 22px; height: 22px; }
+
+    /* ===== LAYOUT ===== */
+    .container { width: min(1100px, 92vw); margin: 0 auto; padding: 64px 0; }
+    section { margin: 64px 0; }
+    .section-title { font-size: clamp(22px, 3vw, 34px); margin-bottom: 18px; font-weight: 800; letter-spacing: .02em; }
+    .sub { color: var(--muted); margin-bottom: 24px; }
+
+    /* ===== ACADEMICS (timeline cards) ===== */
+    .timeline { position: relative; display: grid; gap: 18px; }
+    .timeline::before { content: ""; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: linear-gradient(var(--accent), transparent 60%); opacity: .35; }
+    .t-row { position: relative; display: grid; grid-template-columns: 30px 1fr; gap: 16px; align-items: start; }
+    .t-dot { width: 14px; height: 14px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 0 6px rgba(225,6,0,.15); margin-top: 6px; }
+    .t-card { background: var(--card); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+    .t-header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .t-title { font-weight: 800; }
+    .t-meta { color: var(--muted); font-size: 14px; }
+
+    /* ===== GRID CARDS (skills, achievements, hobbies) ===== */
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    @media (min-width: 640px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 900px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .card {
+      position: relative; overflow: hidden; border-radius: calc(var(--radius) + 4px);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08); box-shadow: var(--shadow);
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,.45); border-color: rgba(21,184,255,.35); }
+
+    .card-media { aspect-ratio: 16/11; display: grid; place-items: center; overflow: hidden; }
+    .card-media img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); transition: transform .3s ease; }
+    .card:hover .card-media img { transform: scale(1.08); }
+
+    .card-body { padding: 12px 14px 16px; }
+    .card-title { font-weight: 700; font-size: 16px; }
+    .card-meta { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.4; }
+
+    /* reveal on scroll */
+    .reveal { opacity: 0; transform: translateY(14px); }
+    .reveal.show { opacity: 1; transform: translateY(0); transition: opacity .6s ease, transform .6s ease; }
+
+    /* footer */
+    footer { color: var(--muted); padding: 40px 0 80px; text-align: center; }
+    .cta { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 16px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.02); }
+    .cta:hover { border-color: var(--ring); }
+
+    /* accessibility & focus */
+    .card:focus-visible, .cta:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <!-- ===== HERO INTRO ===== -->
+  <header class="hero lights" id="top">
+    <div class="countdown" id="countdown">
+      <span id="c3">3</span>
+      <span id="c2">2</span>
+      <span id="c1">1</span>
+      <span id="cGo">GO!</span>
+    </div>
+
+    <div class="driver-card" id="driverCard" aria-live="polite">
+      <div class="driver-name" id="yourName">Your Name</div>
+      <div class="driver-title" id="yourTitle">Full‑Stack Developer • Data Analyst</div>
+    </div>
+
+    <div class="scroll-hint" id="scrollHint" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Scroll
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <!-- ===== ACADEMICS ===== -->
+
+      <section id="Self Intro">
+        <h2 class="section-title">About me</h2>
+        <p>I am a motivated and detail-oriented Computer Science graduate currently pursuing an MBA in
+          Data Science (2024–Present). I have 1 year of professional experience and am currently
+          working at GlobalLogic as an Associate Analyst, where I contribute to data annotation, content
+          engineering, and process improvement. I have a strong foundation in programming,
+          problem-solving, and technology. I enjoy learning and adapting to new challenges while applying
+          my skills to create efficient and innovative solutions. I am flexible, a quick learner, and eager to
+          contribute my knowledge and dedication to a dynamic team, growing both personally and
+          professionally.</p>
+      </section>
+
+      <section id="academics">
+        <h2 class="section-title">Academics</h2>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <!-- ===== SKILLS ===== -->
+      <section id="skills">
+        <h2 class="section-title">Coding Languages & Tech</h2>
+        <div class="grid" id="skillsGrid"></div>
+      </section>
+
+      <!-- ===== ACHIEVEMENTS ===== -->
+      <section id="achievements">
+        <h2 class="section-title">Achievements</h2>
+        <p class="sub">Cards expand on hover. Use images/screenshots, badges, or certificates.</p>
+        <div class="grid" id="achievementsGrid"></div>
+      </section>
+
+      <!-- ===== HOBBIES ===== -->
+      <section id="hobbies">
+        <h2 class="section-title">Hobbies</h2>
+        <p class="sub">Keep it personal. Icons, photos, or anything that represents you.</p>
+        <div class="grid" id="hobbiesGrid"></div>
+      </section>
+
+      <!-- ===== CONTACT / CTA ===== -->
+      <section id="contact">
+        <h2 class="section-title">Contact</h2>
+        <p class="sub">Add your best links here.</p>
+        <div class="grid">
+          <a class="card" href="#" target="_blank" rel="noreferrer noopener">
+            <div class="card-body">
+              <div class="card-title">Email</div>
+              <div class="card-meta">yajna.yadla@gmail.com</div>
+            </div>
+          </a>
+          <a class="card" href="https://www.linkedin.com/in/srujan-yyk-50228432a/" target="_blank" rel="noreferrer noopener">
+            <div class="card-body">
+              <div class="card-title">LinkedIn</div>
+              <div class="'card-meta">linkedin.com/srujan-yyk-50228432a/</div>
+            </div>
+          </a>
+          <a class="card" href="https://github.com/SrujanYadla" target="_blank" rel="noreferrer noopener">
+            <div class="card-body">
+              <div class="card-title">GitHub</div>
+              <div class="card-meta">github.com/SrujanYadla</div>
+            </div>
+          </a>
+          <a class="card" href="#" target="_blank" rel="noreferrer noopener">
+            <div class="card-body">
+              <div class="card-title">Download Resume (PDF)</div>
+              <div class="card-meta">Add your file link</div>
+            </div>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <a class="cta" href="#top">Back to top ↑</a>
+    <div style="margin-top: 12px; font-size: 12px;">© <span id="year"></span> Yadlapalli Yajna Kedara Srujan</div>
+  </footer>
+
+  <script>
+    /* =====================
+       QUICK-EDIT DATA BLOCK
+       Replace with your own info. Works anywhere (pure HTML/CSS/JS).
+    ====================== */
+    const DATA = {
+      name: "Yadlapalli Yajna Kedara Srujan",
+      title: "Associate Analyst @ GlobalLogic • MBA (Data Science) Candidate",
+      academics: [
+        { degree: "MBA (Data Science)", school: "Koneru Lakshmaiah Educational Foundation, Hyderabad", period: "2024 – Present", notes: "Pursuing MBA with focus on Data Science" },
+        { degree: "B.Tech (Computer Science & Engineering)", school: "Koneru Lakshmaiah Educational Foundation, Hyderabad", period: "2020 – 2024", notes: "" },
+        { degree: "XII (MPC)", school: "FIITJEE International School, Vijayawada", period: "2018 – 2020", notes: "" },
+        { degree: "X (CBSE)", school: "Nalanda Vidyaniketan, Vijayawada", period: "2017 – 2018", notes: "" }
+      ],
+      skills: [
+        { title: "Python", img: "https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg", meta: "Programming, data tasks" },
+        { title: "C++", img: "https://raw.githubusercontent.com/devicons/devicon/master/icons/cplusplus/cplusplus-original.svg", meta: "DSA, performance" },
+        { title: "Kotlin", img: "https://raw.githubusercontent.com/devicons/devicon/master/icons/kotlin/kotlin-original.svg", meta: "Android dev" },
+        { title: "C#", img: "https://raw.githubusercontent.com/devicons/devicon/master/icons/csharp/csharp-original.svg", meta: "Unity, .NET" },
+        { title: "Unity Engine", img: "https://raw.githubusercontent.com/devicons/devicon/master/icons/unity/unity-original.svg", meta: "Game development" },
+        { title: "Unreal Engine", img: "https://raw.githubusercontent.com/devicons/devicon/master/icons/unrealengine/unrealengine-original.svg", meta: "Game dev" },
+        { title: "Android Studio", img: "https://raw.githubusercontent.com/devicons/devicon/master/icons/androidstudio/androidstudio-original.svg", meta: "Android apps" }
+      ],
+      achievements: [
+        { title: "Winner — Inter-College Valorant Championship 2022,2023", img: "https://www.citypng.com/public/uploads/preview/hd-valorant-white-official-logo-with-symbol-png-701751694788076hx3eqqqtmc.png", meta: "Team esports tournament" },
+        { title: "Winner — Inter-College CS:GO Tournament 2021", img: "https://static.wikia.nocookie.net/logopedia/images/9/90/Counter-Strike_Global_Offensive_%28Competitive_Icon%29.png/revision/latest?cb=20230330015320", meta: "Team esports tournament" }
+      ],
+      hobbies: [
+        { title: "Watching & Playing Football", img: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?w=1200&q=80&auto=format&fit=crop", meta: "Enthusiast" },
+        { title: "Following Formula 1", img: "https://city-png.b-cdn.net/preview/preview_public/uploads/preview/formula-1-official-white-logo-hd-transparent-background-701751712229658jhzn4h9awp.png", meta: "Fan" },
+        { title: "Listening to Music", img: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1200&q=80&auto=format&fit=crop", meta: "Daily vibe" }
+      ]
+    };
+
+    // ===== Populate hero
+    document.getElementById('yourName').textContent = DATA.name;
+    document.getElementById('yourTitle').textContent = DATA.title;
+
+    // ===== Populate academics
+    const timeline = document.getElementById('timeline');
+    DATA.academics.forEach(a => {
+      const row = document.createElement('div');
+      row.className = 't-row reveal';
+      row.innerHTML = `
+        <div class="t-dot" aria-hidden="true"></div>
+        <article class="t-card">
+          <div class="t-header">
+            <div>
+              <div class="t-title">${a.degree}</div>
+              <div class="t-meta">${a.school}</div>
+            </div>
+            <div class="t-meta">${a.period}</div>
+          </div>
+          ${a.notes ? `<p style="margin:10px 0 0; color: var(--muted);">${a.notes}</p>` : ''}
+        </article>`;
+      timeline.appendChild(row);
+    });
+
+    // ===== Utility to build grid cards
+    function addCards(id, items) {
+      const root = document.getElementById(id);
+      items.forEach(it => {
+        const a = document.createElement('article');
+        a.className = 'card reveal';
+        a.setAttribute('tabindex', '0');
+        a.innerHTML = `
+          <div class="card-media">${it.img ? `<img src="${it.img}" alt="${it.title}" loading="lazy"/>` : ''}</div>
+          <div class="card-body">
+            <div class="card-title">${it.title}</div>
+            ${it.meta ? `<div class='card-meta'>${it.meta}</div>` : ''}
+          </div>`;
+        root.appendChild(a);
+      });
+    }
+
+    addCards('skillsGrid', DATA.skills);
+    addCards('achievementsGrid', DATA.achievements);
+    addCards('hobbiesGrid', DATA.hobbies);
+
+    // ===== Reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ===== Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ===== Intro Countdown + Card entrance
+    const countdown = document.getElementById('countdown');
+    const driverCard = document.getElementById('driverCard');
+    const scrollHint = document.getElementById('scrollHint');
+
+    function show(el, t, dur = 400) {
+      setTimeout(() => {
+        el.style.transition = `opacity ${dur}ms ease, transform ${dur}ms ease`;
+        el.style.opacity = 1; el.style.transform = 'translate(-50%, -50%)';
+      }, t);
+    }
+
+    function hide(el, t, dur = 300) {
+      setTimeout(() => {
+        el.style.transition = `opacity ${dur}ms ease, transform ${dur}ms ease`;
+        el.style.opacity = 0; el.style.transform = 'translate(-50%, -40%) scale(.98)';
+      }, t);
+    }
+
+    // Start sequence
+    (function startIntro(){
+      // prepare state
+      countdown.style.opacity = 0; countdown.style.transform = 'translate(-50%, -60%) scale(0.96)';
+      driverCard.style.opacity = 0; driverCard.style.transform = 'translateY(30px) scale(.96)';
+      scrollHint.style.opacity = 0; scrollHint.style.transform = 'translateY(10px)';
+
+      const s3 = document.getElementById('c3');
+      const s2 = document.getElementById('c2');
+      const s1 = document.getElementById('c1');
+      const sGo = document.getElementById('cGo');
+
+      [s3, s2, s1, sGo].forEach(s => { s.style.opacity = 0; s.style.transform = 'scale(.8)'; s.style.filter = 'drop-shadow(0 8px 30px rgba(0,0,0,.6))'; });
+
+      function flash(el, t) {
+        setTimeout(() => {
+          el.style.transition = 'opacity 220ms ease, transform 220ms cubic-bezier(.16,.84,.44,1)';
+          el.style.opacity = 1; el.style.transform = 'scale(1)';
+          setTimeout(() => { el.style.opacity = .08; el.style.transform = 'scale(1.08)'; }, 320);
+        }, t);
+      }
+
+      // sequence timings for a broadcast-like count-in
+      show(countdown, 100);
+      flash(s3, 200);
+      flash(s2, 800);
+      flash(s1, 1400);
+      flash(sGo, 2000);
+      hide(countdown, 2500);
+
+      // show driver card (your name/title)
+      setTimeout(() => {
+        driverCard.style.transition = 'opacity 500ms ease, transform 500ms ease';
+        driverCard.style.opacity = 1; driverCard.style.transform = 'translateY(0) scale(1)';
+      }, 2700);
+
+      // scroll hint
+      setTimeout(() => {
+        scrollHint.style.transition = 'opacity 600ms ease, transform 600ms ease';
+        scrollHint.style.opacity = 1; scrollHint.style.transform = 'translateY(0)';
+      }, 3300);
+
+      // auto-collapse hero slightly on first scroll
+      window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        const h = window.innerHeight;
+        const factor = Math.min(1, y / (h * 0.6));
+        document.querySelector('.hero').style.transform = `translateY(${factor * -20}px)`;
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>
